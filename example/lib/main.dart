@@ -24,8 +24,10 @@ class _MyAppState extends State<MyApp> {
     config = BatterySensorConfig()
       ..debug = true;
 
+
     sensor = new BatterySensor(config);
 
+    sensor.start();
   }
 
   @override

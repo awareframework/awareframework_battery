@@ -31,15 +31,19 @@ public class SwiftAwareframeworkBatteryPlugin: AwareFlutterPluginCore, FlutterPl
     }
 
     public static func register(with registrar: FlutterPluginRegistrar) {
-        // add own channel
-        super.setChannels(with: registrar,
-                          instance: SwiftAwareframeworkBatteryPlugin(),
-                          methodChannelName: "awareframework_battery/method",
-                          eventChannelName: "awareframework_battery/event")
-
+        let instance = SwiftAwareframeworkBatteryPlugin()
+        super.setMethodChannel(with: registrar, instance: instance, channelName: "awareframework_battery/method")
+        super.setEventChannels(with: registrar,
+                               instance: instance,
+                               channelNames: [
+                                "awareframework_battery/event",
+                                "awareframework_battery/event_on_battery_changed",
+                                "awareframework_battery/event_on_battery_low",
+                                "awareframework_battery/event_on_battery_charging",
+                                "awareframework_battery/event_on_battery_discharging"
+                                ])
     }
 
-    
     public func onBatteryChanged(data: BatteryData) {
         for handler in self.streamHandlers {
             if handler.eventName == "on_battery_changed" {
