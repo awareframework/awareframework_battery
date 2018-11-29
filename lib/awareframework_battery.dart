@@ -17,25 +17,32 @@ class BatterySensor extends AwareSensorCore {
   /// Init Battery Sensor with BatterySensorConfig
   BatterySensor(BatterySensorConfig config):this.convenience(config);
   BatterySensor.convenience(config) : super(config){
-    /// Set sensor method & event channels
     super.setMethodChannel(_batteryMethod);
   }
 
   /// A sensor observer instance
-  Stream<Map<String,dynamic>> onBatteryChanged(String id) {
-     return super.getBroadcastStream(_onBatteryChangedChannel, "on_battery_changed", id).map((dynamic event) => Map<String,dynamic>.from(event));
+  Stream<Map<String,dynamic>> get onBatteryChanged {
+     return super.getBroadcastStream(_onBatteryChangedChannel, "on_battery_changed").map((dynamic event) => Map<String,dynamic>.from(event));
   }
 
-  Stream<dynamic> onBatteryLow(String id) {
-    return super.getBroadcastStream(_onBatteryLowChannel,"on_battery_low",id);
+  Stream<dynamic> get onBatteryLow {
+    return super.getBroadcastStream(_onBatteryLowChannel,"on_battery_low");
   }
 
-  Stream<dynamic> onBatteryCharging(String id) {
-    return super.getBroadcastStream(_onBatteryChargingChannel,"on_battery_charging",id);
+  Stream<dynamic> get onBatteryCharging {
+    return super.getBroadcastStream(_onBatteryChargingChannel,"on_battery_charging");
   }
 
-  Stream<dynamic> onBatteryDischarging(String id) {
-    return super.getBroadcastStream(_onBatteryDischargingChannel,"on_battery_discharging", id);
+  Stream<dynamic> get onBatteryDischarging {
+    return super.getBroadcastStream(_onBatteryDischargingChannel,"on_battery_discharging");
+  }
+
+  @override
+  void cancelAllEventChannels() {
+    super.cancelBroadcastStream("on_battery_changed");
+    super.cancelBroadcastStream("on_battery_low");
+    super.cancelBroadcastStream("on_battery_charging");
+    super.cancelBroadcastStream("on_battery_discharging");
   }
 }
 
@@ -51,10 +58,12 @@ class BatterySensorConfig extends AwareSensorConfig{
 
 /// Make an AwareWidget
 class BatteryCard extends StatefulWidget {
-  BatteryCard({Key key, @required this.sensor, this.cardId = "battery_card_id"}) : super(key: key);
+  BatteryCard({Key key, @required this.sensor}) : super(key: key);
 
-  BatterySensor sensor;
-  String cardId;
+  final BatterySensor sensor;
+
+  String batteryLevel = "";
+  String condition = "";
 
   @override
   BatteryCardState createState() => new BatteryCardState();
@@ -63,20 +72,16 @@ class BatteryCard extends StatefulWidget {
 
 class BatteryCardState extends State<BatteryCard> {
 
-  String batteryLevel = "";
-  String condition = "";
-
-
   @override
   void initState() {
 
     super.initState();
     // set observer
-    widget.sensor.onBatteryChanged(widget.cardId).listen((event) {
+    widget.sensor.onBatteryChanged.listen((event) {
       setState((){
         if(event!=null){
           DateTime.fromMicrosecondsSinceEpoch(event['timestamp']);
-          batteryLevel = event['level'].toString();
+          widget.batteryLevel = event['level'].toString();
         }
       });
     }, onError: (dynamic error) {
@@ -84,20 +89,19 @@ class BatteryCardState extends State<BatteryCard> {
     });
 
     /** onBatteryCharging event */
-    widget.sensor.onBatteryCharging(widget.cardId+"_charging").listen((event) {
+    widget.sensor.onBatteryCharging.listen((event) {
       setState((){
-        // event
-        condition = "charging";
+        widget.condition = "charging";
       });
     }, onError: (dynamic error) {
       print('Received error: ${error.message}');
     });
 
     /** onBatteryDischarging event */
-    widget.sensor.onBatteryDischarging(widget.cardId+"_discharging").listen((event) {
+    widget.sensor.onBatteryDischarging.listen((event) {
       setState((){
         // event
-        condition = "discharging";
+        widget.condition = "discharging";
       });
     }, onError: (dynamic error) {
       print('Received error: ${error.message}');
@@ -112,7 +116,7 @@ class BatteryCardState extends State<BatteryCard> {
     return new AwareCard(
       contentWidget: SizedBox(
           width: MediaQuery.of(context).size.width*0.8,
-          child: new Text("Battery Level: $batteryLevel\nCondition: $condition")
+          child: new Text("Battery Level: ${widget.batteryLevel}\nCondition: ${widget.condition}")
         ),
       title: "Battery",
       sensor: widget.sensor
@@ -121,10 +125,7 @@ class BatteryCardState extends State<BatteryCard> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    widget.sensor.cancelBroadcastStream(widget.cardId);
-    widget.sensor.cancelBroadcastStream(widget.cardId+"_charging");
-    widget.sensor.cancelBroadcastStream(widget.cardId+"_discharging");
+    widget.sensor.cancelAllEventChannels();
     super.dispose();
   }
 
