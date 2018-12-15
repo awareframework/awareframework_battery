@@ -1,6 +1,8 @@
 # Aware Battery
 
-TODO
+[![Build Status](https://travis-ci.com/awareframework/awareframework_battery.svg?branch=master)](https://travis-ci.com/awareframework/awareframework_battery)
+
+The Battery sensor monitors battery information and monitors power related events.
 
 ## Install the plugin into project
 1. Edit `pubspec.yaml`
