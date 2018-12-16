@@ -21,10 +21,11 @@ import 'package:awareframework_core/awareframework_core.dart';
 ### battery Sensor
 - `start()`
 - `stop()` 
-- `sync(force: Boolean)`
+- `sync(bool force)`
 - `enable()`
 - `disable()`
 - `isEnable()`
+- `setLabel(String label)`
 
 ### Configuration Keys
 TODO
@@ -52,14 +53,14 @@ var config = BatterySensorConfig()
   ..label = "label";
 
 // init sensor
-var sensor = new BatterySensor(config);
+var sensor = new BatterySensor.init(config);
 
 void mathod(){
     /// start 
     sensor.start();
     
     /// set observer
-    sensor.onDataChanged.listen((Map<String,dynamic> result){
+    sensor.onDataChanged.listen((BatteryData data){
       setState((){
         // Your code here
       });

@@ -48,7 +48,7 @@ import 'package:flutter/material.dart';
 /// ```
 class BatterySensor extends AwareSensor {
   static const MethodChannel _batteryMethod = const MethodChannel('awareframework_battery/method');
-  static const EventChannel  _batteryStream  = const EventChannel('awareframework_battery/event');
+//  static const EventChannel  _batteryStream  = const EventChannel('awareframework_battery/event');
 
   static const EventChannel  _onBatteryChangedChannel   = const EventChannel('awareframework_battery/event_on_battery_changed');
   static const EventChannel  _onBatteryLowChannel       = const EventChannel('awareframework_battery/event_on_battery_low');
